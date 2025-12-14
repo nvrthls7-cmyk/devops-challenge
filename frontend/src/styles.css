@@ -1,0 +1,21 @@
+:root{
+	--bg:#0f1724;
+	--panel:#0b1220;
+	--muted:#94a3b8;
+	--card:linear-gradient(180deg,#0f1726 0%, #0b1630 100%);
+	--accent:#7c3aed;
+	--glass: rgba(255,255,255,0.03);
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+	body { @apply bg-slate-900 text-slate-100 font-sans; }
+}
+
+/* small helpers */
+.card-grab { cursor: grab }
+.card-grab:active { cursor: grabbing }
+
