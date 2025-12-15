@@ -1,61 +1,38 @@
-# Frontend Dockerfile single stage - simple and clean 
-FROM node:20-alpine
-# Working directory
+# this is for production build of the frontend app
+
+FROM node:20-alpine AS build
 WORKDIR /app
-# Install deps
 COPY package*.json ./
 RUN npm install
-# Copy source
 COPY . .
-# API base URL (build-time)
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-# Build frontend
 RUN npm run build
-# Install a lightweight static server
-RUN npm install -g serve
-# Expose frontend port
-EXPOSE 3000
-# Serve the built app
-CMD ["serve", "-s", "dist", "-l", "3000"]
+
+FROM nginx:alpine
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# think of this as the file that nginx uses to serve the frontend like a steering wheel
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+# this is the main nginx config file like an engine of a car
+COPY nginx-main.conf /etc/nginx/nginx.conf
+
+# i cheated a bit i had to use ai and google to figure this out cuz nginx kept giving me permission denied errors.
+# i built the thing from scratch what do you expect?????? i had no developer so i became the dev myself.
+# BUT HEY IM A DEVOPS ENGINEER NOW SO WHATEVER GETS THE JOB DONE!!!!!! DEBUGGING IS PART OF THE JOB RIGHT? RIGHT????
+# give ownership to non-root user
+RUN chown -R appuser:appgroup \
+  /usr/share/nginx \
+  /var/cache/nginx \
+  /tmp \
+  /etc/nginx
+# run as non-root user
+USER appuser
+
+EXPOSE 80
+
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
 
 
-# multi-stage explained in a fun way below -comment uncomment to use whichever necessary
 
-
-# # build stage the same like backend but so much worse... this looks bomb but took a lot of time instead i could have used ai for this 
-# FROM node:20-alpine AS build
-# # set working directory again
-# WORKDIR /app
-# # copy package files and install dependencies because we need them to build our frontend app else how will it work huh?
-# COPY package*.json ./
-# RUN npm install
-# # copy all the source code LIKE A BOSS
-# COPY . .
-# # NOW THIS IS IMPORTANT ELSE EVERYTHING WILL BREAK. we set the api base url for our frontend app using build args. cuz frontend needs to know where the backend is at right?
-# # ELSE ITS LIKE A LOST CHILD WANDERING IN THE DARKNESS OF THE IT WORLD. SCARY AF. HIS FACE IS SCARY AND UGLY ANYWAY I MEAN THE CLOWN FROM IT MOVIE.
-# ARG VITE_API_BASE_URL
-# ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-# # now we build the frontend app for production cuz we want it to be fast and efficient like a cheetah on steroids
-# RUN npm run build
-
-# # runtime stage - using nginx cuz its lightweight and fast like flash ONLY IF YOURE A DC FAN CUZ IAM 
-# FROM nginx:alpine
-# # copy the built files. the cheating way again. But, it works!
-# COPY --from=build /app/dist /usr/share/nginx/html
-# # expose port 80 cuz nginx listens on it by default.
-# EXPOSE 80
-# # start nginx in the foreground to keep the container running. cuz if it stops, our app goes down like a maybe a burning paper plane. no joke
-# CMD ["nginx", "-g", "daemon off;"]
-
-# # End of Dockerfile the epic conclusion
-# # YOURE STLL READING THIS? REALLY?
-# # what do you expect a poem? well here it is:
-
-# # docker docker build the jar. 
-# # docker docker you raised the bar.
-# # docker docker you are the star.
-# # IT world depends on you.
-# # cuz only a few can do what you do.
-
-# # I HAVE NO IDEA WHAT IM SAYING ANYMORE. AND ALSO POLLUTING THE DOCKERFILE WITH RANDOM RHYMES. SORRY NOT SORRY. JAIL ME FOR THIS CRIME.
