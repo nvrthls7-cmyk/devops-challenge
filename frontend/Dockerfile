@@ -13,7 +13,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# think of this as the file that nginx uses to serve the frontend like a steering wheel
+# think of this as the file that nginx uses to serve the frontend like a steering wheel (proxy api requests to the backend)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 # this is the main nginx config file like an engine of a car
 COPY nginx-main.conf /etc/nginx/nginx.conf
