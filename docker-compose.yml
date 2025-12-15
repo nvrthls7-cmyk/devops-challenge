@@ -1,8 +1,9 @@
-version: '3.8'
+version: "3.8"
+
 services:
-  db:
+  postgres:
     image: postgres:15
-    restart: always
+    container_name: kanban-postgres
     environment:
       POSTGRES_DB: kanbandb
       POSTGRES_USER: postgres
@@ -10,7 +11,31 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - kanban_pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: kanban-backend
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kanbandb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SERVER_PORT: 8085
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8085
+    container_name: kanban-frontend
+    ports:
+      - "4137:80"
+    depends_on:
+      - backend
 
 volumes:
-  db_data:
+  kanban_pgdata:

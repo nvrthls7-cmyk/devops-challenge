@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 
-const API = 'http://localhost:8085/api/tasks'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8085";
+const API = `${BASE_URL}/api/tasks`;
 
 function Column({ title, tasks, onDropTask, onDelete }) {
   return (
