@@ -9,7 +9,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ---------- Run stage ---------- a little decoration for the next stage. we use a lighter image to run our app cuz we dont need all the maven stuff here
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 # set the working directory inside the container againnnnnnnnn!!!! cuz we like consistency dont we all?
 WORKDIR /app
 # now we copy the jar file from the build stage to this stage. this is cheating but necessary evil. 
